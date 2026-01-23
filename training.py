@@ -8,6 +8,13 @@ from PIL import Image
 
 st.title('筋トレメニュー管理アプリ')
 
+with st.expander("初めての人・使い方はこちら"):
+    st.write("""
+    1. **ファイルを読み込む**: 一番下の「ファイル選択」で前回のCSVを入れると、履歴が復活します
+    2. **記録する**: 種目・重量・回数を選んで「セット終わり」をタップ。休憩タイマーが始まります。
+    3. **保存する**: 最後に「全記録をまとめてダウンロード」を押して、最新版をスマホに保存して終了
+    """)
+
 
 if 'training_logs' not in st.session_state:
     st.session_state.training_logs = []
@@ -128,7 +135,7 @@ if st.session_state.training_logs:
 
     st.write('全トレーニング履歴')
     st.dataframe(final_df.sort_index(ascending=False), use_container_width=True)
-    
+
     csv = final_df.to_csv(index = False,mode = 'a',encoding='utf_8_sig').encode('utf_8_sig')
 
     st.download_button(
