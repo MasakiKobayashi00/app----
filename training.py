@@ -102,20 +102,33 @@ if st.session_state.training_logs:
         st.rerun()
     
 
-    df = pd.DataFrame(st.session_state.training_logs)
-    df['日付'] = datetime.now().strftime('%Y/%m/%d')
-    df = df[['日付','部位','種目','重さ','回数']]
-    st.table(df)
+    today_df = pd.DataFrame(st.session_state.training_logs)
+    today_df['日付'] = datetime.now().strftime('%Y/%m/%d')
+    today_df = today_df[['日付','部位','種目','重さ','回数']]
+    st.table(today_df)
 
     uploaded_file = st.file_uploader('前回保存したファイルを選択')
 
     if uploaded_file is not None:
         old_df = pd.read_csv(uploaded_file)
-        final_df = pd.concat([old_df,df],ignore_index = True)
+        final_df = pd.concat([old_df,today_df],ignore_index = True)
     else:
-        final_df = df
+        final_df = today_df
 
+    st.subheader('トレーニング分析')
 
+    today_volume = (today_df['重さ'] * today_df['回数']).sum()
+    
+    left_column,right_column = st.columns(2)
+    with left_column:
+       st.metric("今日の総挙上重量", f"{today_volume} kg")
+
+    with right_column:
+       st.metric("今日のセット数", f"{len(today_df)} セット")
+
+    st.write('全トレーニング履歴')
+    st.dataframe(final_df.sort_index(ascending=False), use_container_width=True)
+    
     csv = final_df.to_csv(index = False,mode = 'a',encoding='utf_8_sig').encode('utf_8_sig')
 
     st.download_button(
