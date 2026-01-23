@@ -69,7 +69,7 @@ rest_time = st.number_input(
     1,
     300,
     30,
-    30
+    1
 )
 
 if st.button('セット終わり！タイマースタート'):
@@ -93,19 +93,24 @@ if st.button('セット終わり！タイマースタート'):
 st.write('休憩終わり！')
 
 if st.session_state.training_logs:
+    if st.button('前の記録を削除'):
+        st.session_state.training_logs.pop()
+        st.rerun()
+    
+
     df = pd.DataFrame(st.session_state.training_logs)
     df['日付'] = datetime.now().strftime('%Y/%m/%d')
     df = df[['日付','部位','種目','重さ','回数']]
     st.table(df)
 
-    csv = df.to_csv('workout',index = False,mode = 'a',header=False, encoding='utf_8_sig')
+    csv = df.to_csv(index = False,mode = 'a',encoding='utf_8_sig').encode('utf_8_sig')
 
     st.download_button(
-        label = '記録をダウンロード'
+        label = '記録をダウンロード',
         data = csv,
         file_name=f"workout_{datetime.now().strftime('%Y%m%d')}.csv",
-        mime='text/csv',
+        mime='text/csv'
     )
 
 else:
-    st.write("記録なし。トレーニングしろ")
+    st.write("記録なし。トレーニングしよう")
