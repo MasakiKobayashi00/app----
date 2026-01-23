@@ -107,7 +107,16 @@ if st.session_state.training_logs:
     df = df[['日付','部位','種目','重さ','回数']]
     st.table(df)
 
-    csv = df.to_csv(index = False,mode = 'a',encoding='utf_8_sig').encode('utf_8_sig')
+    uploaded_file = st.file_uploader('前回保存したファイルを選択')
+
+    if uploaded_file is not None:
+        old_df = pd.read_csv(uploaded_file)
+        final_df = pd.concat([old_df,df],ignore_index = True)
+    else:
+        final_df = df
+
+
+    csv = final_df.to_csv(index = False,mode = 'a',encoding='utf_8_sig').encode('utf_8_sig')
 
     st.download_button(
         label = '記録をダウンロード',
