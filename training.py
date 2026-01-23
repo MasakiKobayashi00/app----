@@ -1,0 +1,103 @@
+import streamlit as st
+import numpy as np
+import pandas as pd
+import time
+
+from PIL import Image
+
+st.title('筋トレメニュー管理アプリ')
+
+
+if 'training_logs' not in st.session_state:
+    st.session_state.training_logs = []
+
+st.write('部位の選択')
+
+options = ['胸','背中','二頭筋','三頭筋','肩','足']
+target_point = st.selectbox(#部位選択
+    '鍛える部位を選択',
+    options
+)
+
+
+menu_list = []
+if target_point == '胸':#胸のメニュー選択
+    menu_list = ['ベンチプレス','インクラインベンチプレス','ダンベルフライ']
+
+elif target_point == '背中':#胸のメニュー選択
+    menu_list = ['懸垂','ハイプーリー','ロープーリー']
+
+elif target_point == '二頭筋':#二頭のメニュー選択
+    menu_list = ['バーベルカール','EZバーカール','ダンベルカール']
+
+elif target_point == '三頭筋':#三頭のメニュー選択
+    menu_list = ['ナローベンチ','スカルクラッシャー','ケーブルロープッシュダウン']
+
+elif target_point == '肩':#肩のメニュー選択
+    menu_list = ['ショルダープレス','サイドレイズ','リアレイズ']
+
+else :
+    menu_list = ['スミススクワット','レッグエクステンション','レッグカール']
+
+selected_menu = st.selectbox('メニュー選択',menu_list)
+
+left_column,right_column = st.columns(2)
+with left_column:
+    weight = st.number_input(
+        '重さ入力',
+        1,
+        150,
+        1,
+        1
+    )
+
+
+with right_column:
+    reps = st.number_input(
+        '回数入力',
+        1,
+        20,
+        1,
+        1
+    )
+
+st.title('インターバルタイマー')
+
+rest_time = st.number_input(
+    '休憩時間',
+    1,
+    300,
+    30,
+    30
+)
+
+if st.button('セット終わり！タイマースタート'):
+    new_entry = {
+        '部位':target_point,
+        '種目':selected_menu,
+        '重さ':weight,
+        '回数':reps,
+    }
+    st.session_state.training_logs.append(new_entry)
+
+    st.success(f'記録完了:{selected_menu}{weight}kg * {reps}回')
+
+    latest_interation = st.empty() #空の要素
+    bar = st.progress(1)
+
+    for i  in range(rest_time + 1):
+        latest_interation.text(f'残り{rest_time-i}秒')
+        bar.progress((rest_time-i)/rest_time) #進捗バー
+        time.sleep(1) #0.秒静止して次に行く←これがないと進まん
+st.write('休憩終わり！')
+
+if st.session_state.training_logs:
+    df = pd.DataFrame(st.session_state.training_logs)
+    st.table(df)
+else:
+    st.write("記録なし。トレーニングしろ")
+
+if st.button('今日の記録を保存する'):
+    df.to_csv('workout',index = False,mode = 'a',header=False, encoding='utf_8_sig')
+    st.balloons()
+    st.success('ファイル[workout.csv]に保存完了')

@@ -87,7 +87,7 @@ if button:
     right_column.write('ここは右カラム')#右カラムはテキスト
 
 #レイアウトを整える(エキスパンダー)
-expander = st.expander('問い合わせ')
+expander = st.expander('問い合わせ')  
 expander.write('問い合わせ内容を書く')
 expander1 = st.expander('問い合わせ1')
 expander1.text_input('問い合わせ1を書く')
