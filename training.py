@@ -23,24 +23,28 @@ target_point = st.selectbox(#部位選択
 
 menu_list = []
 if target_point == '胸':#胸のメニュー選択
-    menu_list = ['ベンチプレス','インクラインベンチプレス','ダンベルフライ']
+    menu_list = ['ベンチプレス','インクラインベンチプレス','ダンベルフライ','チェストプレス','ペックフライ']
 
 elif target_point == '背中':#胸のメニュー選択
-    menu_list = ['懸垂','ハイプーリー','ロープーリー']
+    menu_list = ['懸垂','ハイプーリー','ロープーリー','シーデットロー','ワンハンドローイング','デッドリフト']
 
 elif target_point == '二頭筋':#二頭のメニュー選択
-    menu_list = ['バーベルカール','EZバーカール','ダンベルカール']
+    menu_list = ['バーベルカール','EZバーカール','ダンベルカール','インクラインカール','ハンマーカール','プリチャーカール']
 
 elif target_point == '三頭筋':#三頭のメニュー選択
-    menu_list = ['ナローベンチ','スカルクラッシャー','ケーブルロープッシュダウン']
+    menu_list = ['ナローベンチ','スカルクラッシャー','ケーブルプレスダウン','ディップス']
 
 elif target_point == '肩':#肩のメニュー選択
-    menu_list = ['ショルダープレス','サイドレイズ','リアレイズ']
+    menu_list = ['ショルダープレス','フロントレイズ','サイドレイズ','リアレイズ','スミスショルダープレス','アップライトロウ']
 
 else :
-    menu_list = ['スミススクワット','レッグエクステンション','レッグカール']
+    menu_list = ['スミススクワット','レッグエクステンション','レッグカール','レッグプレス','ブルガリアンスクワット']
 
-selected_menu = st.selectbox('メニュー選択',menu_list)
+selected_menu = st.selectbox('メニュー選択',menu_list+['その他'])
+
+if selected_menu == 'その他':
+    selected_menu = st.text_input('種目名')
+
 
 left_column,right_column = st.columns(2)
 with left_column:
