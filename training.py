@@ -47,7 +47,7 @@ with left_column:
     weight = st.number_input(
         '重さ入力',
         1,
-        150,
+        200,
         1,
         1
     )
@@ -57,7 +57,7 @@ with right_column:
     reps = st.number_input(
         '回数入力',
         1,
-        20,
+        30,
         1,
         1
     )
@@ -69,7 +69,7 @@ rest_time = st.number_input(
     1,
     300,
     30,
-    1
+    10
 )
 
 if st.button('セット終わり！タイマースタート'):
