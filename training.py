@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import time
+from datetime import datetime 
 
 from PIL import Image
 
@@ -93,11 +94,18 @@ st.write('休憩終わり！')
 
 if st.session_state.training_logs:
     df = pd.DataFrame(st.session_state.training_logs)
+    df['日付'] = datetime.now().strftime('%Y/%m/%d')
+    df = df[['日付','部位','種目','重さ','回数']]
     st.table(df)
+
+    csv = df.to_csv('workout',index = False,mode = 'a',header=False, encoding='utf_8_sig')
+
+    st.download_button(
+        label = '記録をダウンロード'
+        data = csv,
+        file_name=f"workout_{datetime.now().strftime('%Y%m%d')}.csv",
+        mime='text/csv',
+    )
+
 else:
     st.write("記録なし。トレーニングしろ")
-
-if st.button('今日の記録を保存する'):
-    df.to_csv('workout',index = False,mode = 'a',header=False, encoding='utf_8_sig')
-    st.balloons()
-    st.success('ファイル[workout.csv]に保存完了')
