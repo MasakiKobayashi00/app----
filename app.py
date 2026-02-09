@@ -2,7 +2,7 @@ from flask import Flask,render_template,request,redirect
 from flask_sqlalchemy import SQLAlchemy
 #render_templateはきれいにするツール
 from flask_migrate import Migrate
-from flask_login import UserMixin,LoginManager,login_user,login_required,logout_user
+from flask_login import UserMixin,LoginManager,login_user,login_required,logout_user,current_user
 from werkzeug.security import generate_password_hash,check_password_hash
 import pytz#タイムゾーン取得できる
 from datetime import datetime
@@ -49,6 +49,7 @@ class Post(db.Model):#データベースの表を作るイメージ
     tokyo_timezone = pytz.timezone('Asia/Tokyo')
     created_at = db.Column(db.DateTime,nullable=False,default = datetime.now(tokyo_timezone))#DateTimeは時間取得,default指定で投稿した時間に設定
     img_name = db.Column(db.String(100),nullable=True)#画像はパスしていやから文字列,nullable=Trueはなくてもいいという意味
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class User(UserMixin,db.Model):#ログイン機能のデータベース
     id = db.Column(db.Integer,primary_key = True)#id
@@ -75,7 +76,7 @@ def create():
         #2画像ファイル名の取得
         filename = file.filename
         #3データベースにファイル名を保存
-        post = Post(title = title,body = body,img_name = filename)
+        post = Post(title = title,body = body,img_name = filename,user_id=current_user.id)
         #4画像を保存/static/img
         save_path = os.path.join(app.static_folder,'img',filename)
         file.save(save_path)
@@ -147,6 +148,17 @@ def login():
     elif request.method == 'GET':#メゾットのゲットはページのアクセスしたとき
         return render_template('login.html',msg = "")
     
+@app.route("/user/<string:username>")
+def user_posts(username):
+    # 1. URLのユーザー名からユーザー情報を探す
+    user = User.query.filter_by(username=username).first_or_404()
+    
+    # 2. そのユーザーのIDに紐づく投稿だけを取得
+    posts = Post.query.filter_by(user_id=user.id).all()
+    
+    # 3. 専用のテンプレートを表示
+    return render_template("user_posts.html", posts=posts, username=username)
+
 @app.route("/logout")
 @login_required
 def logout():
