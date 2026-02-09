@@ -113,7 +113,6 @@ def delete(post_id):
 
 
 @app.route("/signup",methods = ['GET','POST'])#ログイン
-@login_required
 def signup():
     #1:リクエストのメゾットの判別
     if request.method == 'POST':#メゾットのポストはhtml側から送られてきたとき
