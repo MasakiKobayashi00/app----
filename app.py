@@ -10,23 +10,28 @@ import os
 
 app = Flask(__name__)
 
-"いったんランダム"
-app.config["SECRET_KEY"] = os.urandom(24)
+
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
-
 db = SQLAlchemy()
-DB_INFO = {
+
+if app.debug:#ローカル環境
+    "いったんランダム"
+    app.config["SECRET_KEY"] = os.urandom(24)
+    DB_INFO = {
     'user':'postgres',
     'password':'K0023masa',
     'host':'localhost',
     'name':'postgres'
 }
-SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg://{user}:{password}@{host}/{name}'.format(**DB_INFO)
+    SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg://{user}:{password}@{host}/{name}'.format(**DB_INFO)   
 #データベースの情報　＝'postgresql+psycopg://ユーザー名:パスワード@アドレス/データベースの名前'
+else:#本番環境
+    app.config["SECRET_KEY"] = os.environ.get('SECRET_KEY')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL').replace('postgres://','postgresql+psycopg://')
+
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 db.init_app(app)
 
