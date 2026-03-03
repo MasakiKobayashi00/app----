@@ -7,15 +7,32 @@ from streamlit_calendar import calendar
 
 from PIL import Image
 
+def load_css(file_path):
+    with open(file_path, encoding="utf-8") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# フォルダ内にある style.css を読み込む！
+load_css("job.css")
+
 st.title('就活状況管理アプリ')
 
-with st.expander("使い方はこちら"):
+with st.expander("使い方ガイド"):
     st.write("""
-    1. **記録する**: 企業名・フェーズ・日時を入力して「記録する」をタップ。
-    2. **更新する**: 同じ企業名を入れると、古いデータは自動的に最新版へ上書きされます。
-    3. **保存する**: 最後に「CSVダウンロード」を押して保存してください。
+        1. **記録する**
+        - 企業名・現在の状況（フェーズ）・日時を入力して「記録する」をタップ
+        - 同じ企業名でも、別の日程や別の選考ステップとして何件でも登録できます。
+        
+        2. **削除する**
+        - 「直近の1件を削除」または、リストから選んで「選択した項目を削除」できます。
+        
+        3. **カレンダーで確認**
+        - 登録した予定は下のカレンダーに表示されます。
+        - **予定をクリック**すると、その日の選考状況やメモの詳細が確認できます
+        
+        4. **データを引き継ぐ**
+        - 最後に「CSVダウンロード」を押して保存してね。
+        - 次回使う時は、左のサイドバーからそのCSVを読み込めば続きから始められるよ
     """)
-
 
 if 'job_logs' not in st.session_state:
     st.session_state.job_logs = []
@@ -29,10 +46,8 @@ with st.sidebar:
         import_df = pd.read_csv(uploaded_file)
         import_data = import_df.to_dict('records')
         
-        current_firms = [log['企業名'] for log in st.session_state.job_logs]
         for new_log in import_data:
-            if new_log['企業名'] not in current_firms:
-                st.session_state.job_logs.append(new_log)
+            st.session_state.job_logs.append(new_log)
         
         # 読み込み済みフラグを立てて、何度も読み込まないようにする
         st.session_state.last_uploaded = uploaded_file.name
@@ -83,7 +98,6 @@ else:
     )
 
 if st.button('この内容で記録する'):
-    st.session_state.job_logs = [log for log in st.session_state.job_logs if log['企業名'] != firm_name]
     save_phase = else_input if phase == 'その他' else phase
     if firm_name:
         s_time = start_time.strftime('%H:%M') if start_time else ""#スタートタイムがあったs_time = 
@@ -91,7 +105,7 @@ if st.button('この内容で記録する'):
 
         new_data ={
             '企業名':firm_name,
-            '就活状況':phase,
+            '就活状況':save_phase,
             '予定日':date.strftime('%Y/%m/%d'),
             '開始時間':s_time,
             '終了時間':e_time,
@@ -114,22 +128,25 @@ if st.session_state.job_logs:
             st.rerun()
 
     with col_del2:
-        # 2. 特定の企業を選んで削除
-        all_firms = [log['企業名'] for log in st.session_state.job_logs]
-        delete_target = st.selectbox('削除する企業を選択', ['選択してください'] + all_firms)
-        if st.button('選択した企業を削除'):
-            if delete_target != '選択してください':
-                st.session_state.job_logs = [log for log in st.session_state.job_logs if log['企業名'] != delete_target]
-                st.success(f"{delete_target}のデータを削除しました")
+        delete_options = [f"{i}: {log['企業名']} ({log['就活状況']})" for i, log in enumerate(st.session_state.job_logs)]
+        delete_selection = st.selectbox('削除する項目を選択', ['選択してください'] + delete_options)
+        
+        if st.button('選択した項目を削除'):
+            if delete_selection != '選択してください':
+                # インデックス番号(i)を使って、ピンポイントで削除！
+                idx = int(delete_selection.split(':')[0])
+                st.session_state.job_logs.pop(idx)
+                st.success("削除しました！")
                 st.rerun()
 
     calendar_events = []
-    for log in st.session_state.job_logs:
+    for i,log in enumerate(st.session_state.job_logs):
         base_date = log['予定日'].replace('/', '-')
         start_val = f"{base_date}T{log['開始時間']}:00" if log['開始時間'] else base_date#開始時間があったら{base_date}T{log['開始時間']}:00" 、なかったら日にちだけ
         end_val = f"{base_date}T{log['終了時間']}:00" if log['終了時間'] else base_date
         
         calendar_events.append({
+            "id":str(i),
             "title": f"{log['企業名']} ({log['就活状況']})",
             "groupId":memo,
             "start": start_val,
@@ -152,19 +169,17 @@ if st.session_state.job_logs:
     calc_result = calendar(events=calendar_events, options=calendar_options, key="job_calendar")
 
     if calc_result and "eventClick" in calc_result:
-        event_data = calc_result["eventClick"]["event"]
-        st.info(f"詳細確認: {event_data['title']}")
-        
-        clicked_firm = event_data['title'].split(' (')[0]
-        
-        for log in st.session_state.job_logs:
-            if log['企業名'] == clicked_firm:
-                c1, c2 = st.columns(2)
-                with c1:
-                    st.write(f"**予定日:** {log['予定日']}")
-                    st.write(f"**時間:** {log['開始時間']} ~ {log['終了時間']}" if log['開始時間'] else "**時間:** 終日")
-                with c2:
-                    st.write(f"**メモ:** {log['メモ']}")
+        event_id = int(calc_result["eventClick"]["event"]["id"])
+        log = st.session_state.job_logs[event_id] # 直接そのデータを見る！
+        st.info(f"詳細確認: {log['企業名']}")
+
+        c1, c2 = st.columns(2)
+        with c1:
+            st.write(f"**状況:** {log['就活状況']}")
+            st.write(f"**予定日:** {log['予定日']}")
+            st.write(f"**時間:** {log['開始時間']} ~ {log['終了時間']}" if log['開始時間'] else "**時間:** 終日")
+        with c2:
+            st.write(f"**メモ:** {log['メモ']}")
 
     csv = df.to_csv(index=False).encode('utf-8-sig') 
 

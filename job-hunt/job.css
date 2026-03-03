@@ -1,0 +1,18 @@
+/* 背景色を可愛く */
+.stApp {
+    background-color: #fdfbff;
+}
+
+/* ボタンを丸くして目立たせる */
+div.stButton > button {
+    background-color: #0ce3e6;
+    color: white;
+    border-radius: 20px;
+    border: none;
+    font-weight: bold;
+}
+
+/* 入力フォームの角を丸く */
+input {
+    border-radius: 10px !important;
+}
