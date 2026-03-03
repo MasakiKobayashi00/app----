@@ -2,7 +2,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import time
-from datetime import datetime 
+from datetime import datetime,time
 from streamlit_calendar import calendar
 
 from PIL import Image
@@ -48,7 +48,7 @@ firm_name = st.text_input(
     '企業名を入力'
 )
 
-phase_menu = ['エントリーシート提出','１次選考','2次選考','最終選考','その他']
+phase_menu = ['説明会','エントリーシート提出','１次選考','2次選考','最終選考','その他']
 phase = st.selectbox(
     '現在の状況を選択する',
     phase_menu
@@ -74,10 +74,12 @@ else:
         label ,datetime.now(),
     )
     start_time = st.time_input(
-    '開始時間を入力'
+        '開始時間を入力',
+        time(10,0),step = 900
     )
     end_time = st.time_input(
-        '終了時間を入力'
+        '終了時間を入力',
+        time(11,0),step = 900
     )
 
 if st.button('この内容で記録する'):
