@@ -8,16 +8,16 @@ import os
 
 from PIL import Image
 
-def load_css(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, encoding="utf-8") as f:
-            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-    else:
-        # デバッグ用：ファイルが見つからない時にエラーを出す
-        st.error(f"CSSファイルが見つかりません: {file_path}")
+# def load_css(file_path):
+#     if os.path.exists(file_path):
+#         with open(file_path, encoding="utf-8") as f:
+#             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+#     else:
+#         # デバッグ用：ファイルが見つからない時にエラーを出す
+#         st.error(f"CSSファイルが見つかりません: {file_path}")
 
-# フォルダ内にある style.css を読み込む！
-load_css("job.css")
+# # フォルダ内にある style.css を読み込む！
+# load_css("job.css")
 
 st.title('就活状況管理アプリ')
 
